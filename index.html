@@ -175,8 +175,14 @@ html {
 html:not([data-bpm-occ-visible="true"]) #bpmsoftoccchat{visibility:hidden!important;pointer-events:none!important}
 #bpmsoftoccchat-container .bpmsoftoccchat-messenger{position:fixed!important;inset:auto 24px 102px auto!important;left:auto!important;top:auto!important;width:350px!important;max-width:calc(100vw - 32px)!important;height:min(620px,calc(100dvh - 142px))!important;border-radius:18px!important;overflow:hidden;z-index:2147482999!important;box-shadow:0 24px 85px #092a5b33,0 4px 18px #092a5b0c!important}
 #bpmsoftoccchat-container .bpmsoftoccchat-conversation-body-profile{background:#3d75e4!important}
+#bpmsoftoccchat-container .bpmsoftoccchat-conversation-body-profile .bpmsoftoccchat-team-profile-compact-avatar-container{display:none!important}
+#bpmsoftoccchat-container .bpmsoftoccchat-team-profile-compact-contents{padding:8px 56px 8px 24px!important}
 #bpmsoftoccchat-container .bpmsoftoccchat-composer textarea{width:calc(100% - 60px)!important}
 #bpmsoftoccchat-container .bpmsoftoccchat-composer-send-button{left:auto!important;right:12px!important}
+/* The picker is anchored above the smile button, inside the chat frame. */
+#bpmsoftoccchat-container .bpmsoftoccchat-conversation-footer{z-index:2147483647!important;overflow:visible!important}
+#bpmsoftoccchat-container .bpmsoftoccchat-app{left:30px!important;right:auto!important;width:21px!important;height:21px!important;overflow:visible!important}
+#bpmsoftoccchat-container .bpmsoftoccchat-smile-container{left:-30px!important;right:auto!important;bottom:35px!important;width:min(326px,calc(100vw - 56px))!important;height:210px!important;max-height:min(210px,calc(100dvh - 234px))!important;box-sizing:border-box!important;overflow-x:hidden!important;overflow-y:auto!important;z-index:2147483647!important}
 @media(max-width:600px){#bpmsoftoccchat-container .bpmsoftoccchat-messenger{right:16px!important;bottom:96px!important;width:calc(100vw - 32px)!important;height:min(620px,calc(100dvh - 124px))!important}}
 @media(max-width:820px){
   .wrapper--menu-opened[data-v-2595b966]{grid-template-columns:minmax(0,1fr)}
@@ -233,7 +239,7 @@ html:not([data-bpm-occ-visible="true"]) #bpmsoftoccchat{visibility:hidden!import
   @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 <section class="panel" id="contact-panel" role="dialog" aria-modal="false" aria-labelledby="panel-title" hidden>
-  <header class="panel-head"><div><span class="eyebrow">Обратная связь</span><h2 id="panel-title">Заполнить заявку</h2></div><button type="button" class="close" id="close-panel" aria-label="Закрыть окно"><svg viewbox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></header>
+  <header class="panel-head"><div><span class="eyebrow">Форма регистрации</span><h2 id="panel-title">Заполнить заявку</h2></div><button type="button" class="close" id="close-panel" aria-label="Закрыть окно"><svg viewbox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></header>
   <div class="panel-body" id="panel-body">
     <div id="request-pane">
       <p class="lead">Оставьте контактные данные и выберите тип деятельности.<br>Мы свяжемся с вами по указанным контактам.</p>
@@ -268,7 +274,9 @@ window.BPMSOFT_PAGE_CONFIG = {
     landingId:"4466d338-3e02-4e3b-8d59-16d2ab34c1b1",
     serviceUrl:"https://26101418004786-0000000-bpmsoft-crm.cloudbpm.ru/ServiceModel/GeneratedObjectWebFormService.svc/SaveWebFormObjectData",
     redirectUrl:"",
-    fields:{company:"Account",inn:"BpmINN",fullName:"Contact",phone:"MobilePhone",email:"Email",industry:"BpmIndustry"},
+    // Имена полей веб-формы — из сгенерированного «Лендинг.txt».
+    // Account и Contact относятся к полям сущности, а форма принимает Company и Name.
+    fields:{company:"Company",inn:"BpmINN",fullName:"Name",phone:"MobilePhone",email:"Email",industry:"BpmIndustry"},
     contactFields:{FullName:"#bpm-value-fullName",Phone:"#bpm-value-phone",Email:"#bpm-value-email"},
     customFields:{},
     jqueryUrl:"https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js",
@@ -344,6 +352,10 @@ window.BPMSOFT_PAGE_CONFIG = {
   }
   function settingsMissing(){const c=config.form;return !c.enabled||!guid.test(c.landingId)||![c.serviceUrl,c.jqueryUrl,c.createObjectUrl].every(isHttps)||fieldKeys.some(key=>!c.fields[key])||new Set(Object.values(c.fields)).size!==fieldKeys.length||!config.industryTypes.some(item=>item.value===type.value);}
   function fail(text){if(finished)return;finished=true;clearTimeout(responseTimer);setBusy(false);showStatus(text,"error");}
+  function failResponse(result,fallback){
+    const message=typeof result?.resultMessage==="string"?result.resultMessage.trim():typeof result?.Message==="string"?result.Message.trim():"";
+    fail(message?"BPMSoft: "+message:fallback);
+  }
   form.addEventListener("submit",async event=>{
     event.preventDefault();if(busy)return;$("form-status").hidden=true;if(!validate())return;
     if(settingsMissing()){showStatus("Подключение формы ещё не завершено. Обратитесь к администратору сайта.","error");return;}
@@ -360,13 +372,13 @@ window.BPMSOFT_PAGE_CONFIG = {
       const c={fields,contactFields:config.form.contactFields,customFields:config.form.customFields,landingId:config.form.landingId,serviceUrl:config.form.serviceUrl,redirectUrl:config.form.redirectUrl,
         onSuccess:result=>{
           if(finished)return;
-          if(!result||result.resultCode!==0){fail("Система не подтвердила регистрацию заявки. Проверьте данные или обратитесь в чат.");return;}
+          if(!result||(result.resultCode!==0&&result.resultCode!=="0")){failResponse(result,"BPMSoft вернул ответ без подтверждения регистрации заявки. Уточните её получение перед повторной отправкой.");return;}
           finished=true;clearTimeout(responseTimer);setBusy(false);form.reset();type.classList.remove("has-value");fieldKeys.forEach(key=>document.getElementById("bpm-value-"+key).value="");showStatus("Спасибо! Ваша заявка принята. Мы свяжемся с вами по указанным контактам.","success");
           if(isHttps(config.form.redirectUrl))window.location.assign(config.form.redirectUrl);
         },
-        onError:()=>fail("Не удалось подтвердить приём заявки. Проверьте соединение или обратитесь в чат."),
+        onError:xhr=>failResponse(xhr?.responseJSON,xhr?.status?"Ошибка подключения к BPMSoft (HTTP "+xhr.status+"). Данные формы сохранены.":"Не удалось получить ответ BPMSoft. Проверьте соединение. Данные формы сохранены."),
         onComplete:()=>{if(!finished)fail("Не удалось подтвердить результат отправки. Уточните получение заявки через чат перед повторной отправкой.");},
-        onSaveDuplicatedEntityExceptionHandler:()=>fail("Похожая заявка уже зарегистрирована. Уточните её состояние через чат.")
+        onSaveDuplicatedEntityExceptionHandler:result=>failResponse(result,"Похожая заявка уже зарегистрирована. Уточните её состояние через чат.")
       };
       responseTimer=setTimeout(()=>fail("Ответ системы задерживается. Уточните получение заявки через чат перед повторной отправкой."),30000);
       window.landing.createObjectFromLanding(c);
@@ -378,7 +390,6 @@ window.BPMSOFT_PAGE_CONFIG = {
     if(!guid.test(c.channelId)||![c.cssUrl,c.widgetJsUrl,c.vendorsJsUrl].every(isHttps)){showFailure();return;}
     const css=document.createElement("link");css.rel="stylesheet";css.href=c.cssUrl;document.head.appendChild(css);
     window.bpmsoftoccconfig={...c.options,channelId:c.channelId};["connectorUrl","fileServerUrl","srcUrl"].forEach(key=>{if(c[key])window.bpmsoftoccconfig[key]=c[key];});
-    const logo=document.querySelector(".footer_logo img");if(logo)window.bpmsoftoccconfig.headerImageSrc=logo.src;
     try{
       await loadScript(c.widgetJsUrl);await loadScript(c.vendorsJsUrl);
       // Vue заменяет div#bpmsoftocc-chat своим корневым элементом. Наблюдаем

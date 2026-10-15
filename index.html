@@ -172,9 +172,12 @@ html {
 /* Static snapshot: original visual elements keep their layout; their actions are disabled. */
 #app a,#app button,#app [style*="cursor: pointer"],#app .header_nav__menu-item,#app .header_nav__panel span,#app .menu-item__header,#app .menu-item__title{cursor:default!important}
 #bpmsoftoccchat-widget-startbutton{display:none!important}
-html:not([data-bpm-occ-visible="true"]) #bpmsoftoccchat-container{visibility:hidden!important;pointer-events:none!important}
-#bpmsoftoccchat-container{right:24px!important;bottom:102px!important;left:auto!important;z-index:2147482999!important;max-width:calc(100vw - 32px)!important}
+html:not([data-bpm-occ-visible="true"]) #bpmsoftoccchat{visibility:hidden!important;pointer-events:none!important}
+#bpmsoftoccchat-container .bpmsoftoccchat-messenger{position:fixed!important;inset:auto 24px 102px auto!important;left:auto!important;top:auto!important;width:350px!important;max-width:calc(100vw - 32px)!important;height:min(620px,calc(100dvh - 142px))!important;border-radius:18px!important;overflow:hidden;z-index:2147482999!important;box-shadow:0 24px 85px #092a5b33,0 4px 18px #092a5b0c!important}
 #bpmsoftoccchat-container .bpmsoftoccchat-conversation-body-profile{background:#3d75e4!important}
+#bpmsoftoccchat-container .bpmsoftoccchat-composer textarea{width:calc(100% - 60px)!important}
+#bpmsoftoccchat-container .bpmsoftoccchat-composer-send-button{left:auto!important;right:12px!important}
+@media(max-width:600px){#bpmsoftoccchat-container .bpmsoftoccchat-messenger{right:16px!important;bottom:96px!important;width:calc(100vw - 32px)!important;height:min(620px,calc(100dvh - 124px))!important}}
 @media(max-width:820px){
   .wrapper--menu-opened[data-v-2595b966]{grid-template-columns:minmax(0,1fr)}
   .wrapper--menu-opened[data-v-2595b966]>.widget-menu{display:none}
@@ -233,7 +236,7 @@ html:not([data-bpm-occ-visible="true"]) #bpmsoftoccchat-container{visibility:hid
   <header class="panel-head"><div><span class="eyebrow">Обратная связь</span><h2 id="panel-title">Заполнить заявку</h2></div><button type="button" class="close" id="close-panel" aria-label="Закрыть окно"><svg viewbox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></header>
   <div class="panel-body" id="panel-body">
     <div id="request-pane">
-      <p class="lead">Оставьте контактные данные и выберите тип заявки.<br>Мы свяжемся с вами по указанным контактам.</p>
+      <p class="lead">Оставьте контактные данные и выберите тип деятельности.<br>Мы свяжемся с вами по указанным контактам.</p>
       <form id="request-form" novalidate>
         <div class="grid">
           <div class="field wide-mobile"><label class="label" for="company">Название компании<span class="star" aria-hidden="true">*</span></label><input type="text" id="company" name="Company" placeholder="Название организации" autocomplete="organization" maxlength="250" required aria-describedby="company-error"><span class="error" id="company-error"></span></div>
@@ -241,35 +244,31 @@ html:not([data-bpm-occ-visible="true"]) #bpmsoftoccchat-container{visibility:hid
           <div class="field wide"><label class="label" for="fullName">ФИО<span class="star" aria-hidden="true">*</span></label><input type="text" id="fullName" name="FullName" placeholder="Фамилия Имя Отчество" autocomplete="name" maxlength="250" required aria-describedby="fullName-error"><span class="error" id="fullName-error"></span></div>
           <div class="field"><label class="label" for="phone">Телефон<span class="star" aria-hidden="true">*</span></label><input type="text" id="phone" name="Phone" placeholder="+7 (___) ___-__-__" autocomplete="tel" inputmode="tel" maxlength="40" required aria-describedby="phone-error"><span class="error" id="phone-error"></span></div>
           <div class="field"><label class="label" for="email">Email<span class="star" aria-hidden="true">*</span></label><input type="text" id="email" name="Email" placeholder="name@company.ru" autocomplete="email" inputmode="email" spellcheck="false" autocapitalize="none" maxlength="250" required aria-describedby="email-error"><span class="error" id="email-error"></span></div>
-          <div class="field wide"><label class="label" for="requestType">Тип заявки<span class="star" aria-hidden="true">*</span></label><div class="select"><select id="requestType" name="RequestType" required aria-describedby="requestType-error"><option value="" disabled selected>Выберите тип заявки</option></select><svg viewbox="0 0 12 8" fill="none" aria-hidden="true"><path d="m1 1 5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></div><span class="error" id="requestType-error"></span></div>
+          <div class="field wide"><label class="label" for="industry">Тип деятельности<span class="star" aria-hidden="true">*</span></label><div class="select"><select id="industry" name="RequestType" required aria-describedby="industry-error"><option value="" disabled selected>Выберите тип деятельности</option></select><svg viewbox="0 0 12 8" fill="none" aria-hidden="true"><path d="m1 1 5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></div><span class="error" id="industry-error"></span></div>
         </div>
-        <label class="consent"><input type="checkbox" id="consent" required aria-describedby="consent-error"><span>Даю согласие на <button class="text-button" type="button" data-document="consentUrl">обработку персональных данных</button> в соответствии с <button class="text-button" type="button" data-document="privacyUrl">политикой конфиденциальности</button>.</span></label><span class="error" id="consent-error"></span>
-        <div class="legal" id="legal-note" hidden><strong>Документы для обработки данных</strong><span id="legal-text">Ссылки на документы ещё не добавлены. Сейчас форма работает в режиме просмотра, данные не отправляются.</span><button type="button" class="legal-close" id="legal-close">Скрыть</button></div>
+        <label class="consent"><input type="checkbox" id="consent" required aria-describedby="consent-error"><span>Даю согласие на <button class="text-button" type="button">обработку персональных данных</button> в соответствии с <button class="text-button" type="button">политикой конфиденциальности</button>.</span></label><span class="error" id="consent-error"></span>
+        
         <button type="submit" class="submit" id="submit-button"><span id="submit-caption">Отправить заявку</span><svg viewbox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
         <p class="footnote">Все поля обязательны для заполнения</p><div class="notice" id="form-status" role="status" aria-live="polite" hidden></div>
       </form>
     </div>
-    <div id="chat-pane" hidden>
-      <div class="chat-body"><div class="chat-symbol"><svg viewbox="0 0 28 28" fill="none" aria-hidden="true"><path d="M23 13a9 9 0 0 1-9 9H7l-4 3v-8a9 9 0 0 1 0-8 10 10 0 0 1 20 4Z" stroke="currentColor" stroke-width="1.5"></path><path d="M9 12h10M9 16h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></div><h3>Здравствуйте!</h3><p>Здесь можно будет задать вопрос нашей команде и продолжить общение прямо на сайте.</p><div class="chat-preview-note" id="chat-note">Предпросмотр. Для переписки необходимо подключить канал BPMSoft OCC. Сообщения не отправляются.</div><div class="composer"><textarea disabled aria-label="Сообщение (предпросмотр)" placeholder="Чат будет доступен после подключения"></textarea><button type="button" disabled aria-label="Отправка недоступна"><svg viewbox="0 0 20 20" fill="none" aria-hidden="true"><path d="m3 3 15 7-15 7 3-7-3-7Zm3 7h12" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg></button></div><p class="chat-footer">BPMSoft OCC</p></div>
-    </div>
-  </div>
-</section>
+    <div id="chat-pane" hidden><div class="chat-body"><div class="chat-symbol"><svg viewbox="0 0 28 28" fill="none" aria-hidden="true"><path d="M23 13a9 9 0 0 1-9 9H7l-4 3v-8a9 9 0 0 1 0-8 10 10 0 0 1 20 4Z" stroke="currentColor" stroke-width="1.5"></path></svg></div><h3 id="chat-loading-title">Подключаем чат</h3><p>Пожалуйста, подождите.</p><div class="chat-preview-note" id="chat-note" role="status" aria-live="polite">Загружаем окно переписки…</div></div></div></div></section>
 <nav class="dock" aria-label="Обратная связь">
   <button class="primary" id="request-tab" type="button" aria-expanded="false" aria-controls="contact-panel"><svg viewbox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M14 3v6h6M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Заполнить заявку</span></button>
   <span class="divider" aria-hidden="true"></span>
   <button id="chat-tab" type="button" aria-expanded="false" aria-controls="contact-panel"><svg viewbox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11a8 8 0 0 1-8 8H6l-3 3V11a8.5 8.5 0 0 1 17 0Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M7 10h9M7 14h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg><span>Чат</span></button>
 </nav>
-</template><div id="bpm-contact-widget"></div><div id="bpmsoftocc-chat"></div><div id="bpm-form-values" hidden="hidden" aria-hidden="true"><input type="hidden" id="bpm-value-company"><input type="hidden" id="bpm-value-inn"><input type="hidden" id="bpm-value-fullName"><input type="hidden" id="bpm-value-phone"><input type="hidden" id="bpm-value-email"><input type="hidden" id="bpm-value-requestType"></div><script id="bpm-contact-script">/* Единственный собственный скрипт страницы. Исходные скрипты сайта удалены.
+</template><div id="bpm-contact-widget"></div><div id="bpmsoftocc-chat"></div><div id="bpm-form-values" hidden="hidden" aria-hidden="true"><input type="hidden" id="bpm-value-company"><input type="hidden" id="bpm-value-inn"><input type="hidden" id="bpm-value-fullName"><input type="hidden" id="bpm-value-phone"><input type="hidden" id="bpm-value-email"><input type="hidden" id="bpm-value-industry"></div><script id="bpm-contact-script">/* Единственный собственный скрипт страницы. Исходные скрипты сайта удалены.
    НАСТРОЙКИ: код лендинга из «Шаг 2», коды полей и значения справочника,
    затем код канала «Виджет для сайта» из «Получить скрипт» BPMSoft OCC.
-   По умолчанию форма и чат работают в режиме просмотра без сетевых запросов. */
+   Форма и OCC подключены по настройкам заказчика. */
 window.BPMSOFT_PAGE_CONFIG = {
   form: {
-    enabled:false,
-    landingId:"088c5d46-1364-4d08-baf6-14b8b1337f26",
-    serviceUrl:"https://26050611172401-0000000-bpmsoft-fn.cloudbpm.ru/ServiceModel/GeneratedObjectWebFormService.svc/SaveWebFormObjectData",
+    enabled:true,
+    landingId:"4466d338-3e02-4e3b-8d59-16d2ab34c1b1",
+    serviceUrl:"https://26101418004786-0000000-bpmsoft-crm.cloudbpm.ru/ServiceModel/GeneratedObjectWebFormService.svc/SaveWebFormObjectData",
     redirectUrl:"",
-    fields:{company:"Company",inn:"",fullName:"Name",phone:"MobilePhone",email:"Email",requestType:""},
+    fields:{company:"Account",inn:"BpmINN",fullName:"Contact",phone:"MobilePhone",email:"Email",industry:"BpmIndustry"},
     contactFields:{FullName:"#bpm-value-fullName",Phone:"#bpm-value-phone",Email:"#bpm-value-email"},
     customFields:{},
     jqueryUrl:"https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js",
@@ -277,11 +276,9 @@ window.BPMSOFT_PAGE_CONFIG = {
     trackingUrl:"https://files.cloudbpm.ru/Delivery/js/track-cookies.js",
     enableTracking:false
   },
-  // Демонстрационные записи. Перед включением отправки заменить value на Id
-  // и label на название реальной записи справочника «Тип заявки».
-  requestTypes:[{value:"demo-purchase",label:"Вопрос по закупке"},{value:"demo-partnership",label:"Сотрудничество"},{value:"demo-support",label:"Технический вопрос"},{value:"demo-other",label:"Другое"}],
-  documents:{privacyUrl:"",consentUrl:""},
-  occ:{enabled:false,channelId:"",cssUrl:"",widgetJsUrl:"",vendorsJsUrl:"",connectorUrl:"",fileServerUrl:"",srcUrl:"",options:{title:"Онлайн-чат",subtitle:"Обратная связь",chatMessagePlaceholder:"Введите сообщение…",closeChatCaption:"Свернуть чат",sendInitialMessageOnWidgetButtonClick:true}}
+  // BPMSoft принимает справочные значения по точному названию записи.
+  industryTypes:[{value:"IT",label:"IT"},{value:"Металлургия",label:"Металлургия"},{value:"Полимеры",label:"Полимеры"},{value:"Электроника",label:"Электроника"}],
+  occ:{enabled:true,channelId:"30289d3b-2ca1-4819-b030-b6b349c26375",cssUrl:"https://bpmsoft-oc-widget1.cloudbpm.ru/3.2/widget.css",widgetJsUrl:"https://bpmsoft-oc-widget1.cloudbpm.ru/3.2/widget.js",vendorsJsUrl:"https://bpmsoft-oc-widget1.cloudbpm.ru/3.2/chunk-vendors.js",connectorUrl:"https://bpmsoft-oc-connector1.cloudbpm.ru",fileServerUrl:"",srcUrl:"",options:{title:"Онлайн-чат",subtitle:"Обратная связь",themeColor:"#3d75e4",chatMessagePlaceholder:"Введите сообщение…",closeChatCaption:"Свернуть чат",sendInitialMessageOnWidgetButtonClick:true}}
 };
 (() => {
   "use strict";
@@ -290,23 +287,25 @@ window.BPMSOFT_PAGE_CONFIG = {
   const root=host.attachShadow({mode:"open"});
   root.appendChild(document.getElementById("bpm-contact-template").content.cloneNode(true));
   const $=id=>root.getElementById(id);
-  const form=$("request-form"),panel=$("contact-panel"),type=$("requestType");
-  const fieldKeys=["company","inn","fullName","phone","email","requestType"];
+  const form=$("request-form"),panel=$("contact-panel"),type=$("industry");
+  const fieldKeys=["company","inn","fullName","phone","email","industry"];
   const guid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const isHttps=value=>{try{return new URL(value).protocol==="https:";}catch{return false;}};
   let activePane=null,busy=false,finished=false,responseTimer=null,nativeReady=false;
-  config.requestTypes.forEach(item=>{const option=document.createElement("option");option.value=item.value;option.textContent=item.label;type.appendChild(option);});
+  const hideNative=()=>document.documentElement.setAttribute("data-bpm-occ-visible","false");
+  function openNativeChat(){panel.hidden=true;document.documentElement.setAttribute("data-bpm-occ-visible","true");document.getElementById("bpmsoftoccchat-widget-startbutton")?.click();}
+  config.industryTypes.forEach(item=>{const option=document.createElement("option");option.value=item.value;option.textContent=item.label;type.appendChild(option);});
   function setDockState(pane){
     $("request-tab").setAttribute("aria-expanded",String(pane==="request"));
     $("chat-tab").setAttribute("aria-expanded",String(pane==="chat"));
     $("request-tab").classList.toggle("secondary",pane==="chat");
   }
-  function closePanel(restoreFocus=true){const old=activePane;panel.hidden=true;activePane=null;document.documentElement.setAttribute("data-bpm-occ-visible","false");setDockState(null);if(restoreFocus)$(old==="chat"?"chat-tab":"request-tab").focus();}
+  function closePanel(restoreFocus=true){const old=activePane;panel.hidden=true;activePane=null;hideNative();setDockState(null);if(restoreFocus)$(old==="chat"?"chat-tab":"request-tab").focus();}
   function switchPane(pane){
     if(activePane===pane){closePanel();return;}
     activePane=pane;setDockState(pane);
     document.documentElement.setAttribute("data-bpm-occ-visible",String(pane==="chat"&&nativeReady));
-    if(pane==="chat"&&nativeReady){panel.hidden=true;document.getElementById("bpmsoftoccchat-widget-startbutton")?.click();return;}
+    if(pane==="chat"&&nativeReady){openNativeChat();return;}
     panel.hidden=false;$("request-pane").hidden=pane!=="request";$("chat-pane").hidden=pane!=="chat";
     $("panel-title").textContent=pane==="request"?"Заполнить заявку":"Онлайн-чат";
     $("panel-body").scrollTop=0;
@@ -315,7 +314,9 @@ window.BPMSOFT_PAGE_CONFIG = {
   $("request-tab").addEventListener("click",()=>switchPane("request"));
   $("chat-tab").addEventListener("click",()=>switchPane("chat"));
   $("close-panel").addEventListener("click",()=>closePanel());
-  root.addEventListener("keydown",event=>{if(event.key==="Escape"&&!panel.hidden){event.preventDefault();closePanel();}});
+  root.addEventListener("keydown",event=>{if(event.key==="Escape"&&activePane){event.preventDefault();closePanel();}});
+  document.addEventListener("keydown",event=>{if(event.key==="Escape"&&activePane){event.preventDefault();closePanel();}});
+  document.addEventListener("click",event=>{if(event.target.closest?.("#bpmsoftoccchat-closebutton"))closePanel(false);},true);
   document.addEventListener("pointerdown",event=>{if(!panel.hidden&&!event.composedPath().includes(host))closePanel(false);});
   function clearError(input){input.removeAttribute("aria-invalid");const error=$(input.id+"-error");if(error)error.textContent="";}
   function validate(){
@@ -323,7 +324,7 @@ window.BPMSOFT_PAGE_CONFIG = {
     [...form.querySelectorAll("[required]")].forEach(input=>{
       clearError(input);if(input.type==="text")input.value=input.value.trim();let error="";
       if(input.type==="checkbox"){if(!input.checked)error="Подтвердите согласие на обработку данных.";}
-      else if(!input.value)error=input.tagName==="SELECT"?"Выберите тип заявки.":"Заполните поле.";
+      else if(!input.value)error=input.tagName==="SELECT"?"Выберите тип деятельности.":"Заполните поле.";
       else if(input.id==="inn"&&!/^\d{10}(\d{2})?$/.test(input.value))error="Введите 10 или 12 цифр ИНН.";
       else if(input.id==="phone"&&(!/^[+\d\s().-]+$/.test(input.value)||input.value.replace(/\D/g,"").length<7||input.value.replace(/\D/g,"").length>15))error="Проверьте номер телефона.";
       else if(input.id==="email"&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value))error="Проверьте адрес электронной почты.";
@@ -341,11 +342,10 @@ window.BPMSOFT_PAGE_CONFIG = {
     const promise=new Promise((resolve,reject)=>{const script=document.createElement("script");script.src=url;script.async=false;const timer=setTimeout(()=>{script.remove();reject(new Error("Script timeout"));},15000);script.onload=()=>{clearTimeout(timer);resolve();};script.onerror=()=>{clearTimeout(timer);reject(new Error("Script unavailable"));};document.head.appendChild(script);});
     loading.set(url,promise);promise.catch(()=>loading.delete(url));return promise;
   }
-  function settingsMissing(){const c=config.form;return !guid.test(c.landingId)||![c.serviceUrl,c.jqueryUrl,c.createObjectUrl].every(isHttps)||fieldKeys.some(key=>!c.fields[key])||new Set(Object.values(c.fields)).size!==fieldKeys.length||!config.requestTypes.every(item=>guid.test(item.value))||!guid.test(type.value)||![config.documents.privacyUrl,config.documents.consentUrl].every(isHttps);}
+  function settingsMissing(){const c=config.form;return !c.enabled||!guid.test(c.landingId)||![c.serviceUrl,c.jqueryUrl,c.createObjectUrl].every(isHttps)||fieldKeys.some(key=>!c.fields[key])||new Set(Object.values(c.fields)).size!==fieldKeys.length||!config.industryTypes.some(item=>item.value===type.value);}
   function fail(text){if(finished)return;finished=true;clearTimeout(responseTimer);setBusy(false);showStatus(text,"error");}
   form.addEventListener("submit",async event=>{
     event.preventDefault();if(busy)return;$("form-status").hidden=true;if(!validate())return;
-    if(!config.form.enabled){showStatus("Форма заполнена корректно. Это режим просмотра: заявка не отправлена. После подключения BPMSoft данные будут передаваться в систему.");return;}
     if(settingsMissing()){showStatus("Подключение формы ещё не завершено. Обратитесь к администратору сайта.","error");return;}
     setBusy(true);finished=false;
     try{
@@ -372,18 +372,20 @@ window.BPMSOFT_PAGE_CONFIG = {
       window.landing.createObjectFromLanding(c);
     }catch(error){fail("Не удалось загрузить подключение к форме. Проверьте соединение или обратитесь в чат.");}
   });
-  root.querySelectorAll("[data-document]").forEach(button=>button.addEventListener("click",()=>{const url=config.documents[button.dataset.document];if(isHttps(url))window.open(url,"_blank","noopener,noreferrer");else $("legal-note").hidden=false;}));
-  $("legal-close").addEventListener("click",()=>$("legal-note").hidden=true);
   async function initOcc(){
     const c=config.occ;if(!c.enabled)return;
-    const showFailure=()=>{$("chat-note").textContent="Сейчас не удаётся подключить онлайн-чат. Пожалуйста, оставьте заявку через соседнюю вкладку.";};
+    const showFailure=()=>{$("chat-loading-title").textContent="Чат временно недоступен";$("chat-note").textContent="Не удалось загрузить окно переписки. Обновите страницу или оставьте заявку через соседнюю вкладку.";};
     if(!guid.test(c.channelId)||![c.cssUrl,c.widgetJsUrl,c.vendorsJsUrl].every(isHttps)){showFailure();return;}
     const css=document.createElement("link");css.rel="stylesheet";css.href=c.cssUrl;document.head.appendChild(css);
     window.bpmsoftoccconfig={...c.options,channelId:c.channelId};["connectorUrl","fileServerUrl","srcUrl"].forEach(key=>{if(c[key])window.bpmsoftoccconfig[key]=c[key];});
+    const logo=document.querySelector(".footer_logo img");if(logo)window.bpmsoftoccconfig.headerImageSrc=logo.src;
     try{
       await loadScript(c.widgetJsUrl);await loadScript(c.vendorsJsUrl);
-      const detect=()=>{if(document.getElementById("bpmsoftoccchat-widget-startbutton")){nativeReady=true;observer.disconnect();clearTimeout(timer);return true;}return false;};
-      const observer=new MutationObserver(detect);const timer=setTimeout(()=>{observer.disconnect();if(!detect())showFailure();},12000);observer.observe(document.getElementById("bpmsoftocc-chat"),{childList:true,subtree:true});detect();
+      // Vue заменяет div#bpmsoftocc-chat своим корневым элементом. Наблюдаем
+      // document.body, чтобы подключение оставалось рабочим после этого замещения.
+      let observer=null,timer=null;
+      const detect=()=>{if(document.getElementById("bpmsoftoccchat-widget-startbutton")){nativeReady=true;observer?.disconnect();clearTimeout(timer);if(activePane==="chat")openNativeChat();return true;}return false;};
+      if(!detect()){observer=new MutationObserver(detect);observer.observe(document.body,{childList:true,subtree:true});timer=setTimeout(()=>{observer.disconnect();if(!detect())showFailure();},12000);}
     }catch(error){showFailure();}
   }
   initOcc();
